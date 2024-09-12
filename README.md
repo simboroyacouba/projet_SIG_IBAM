@@ -54,7 +54,7 @@ Elle fonctionne avec springboot, postgres, postgis
 
 6. Lancez l'application :
   
-       Ouvrez votre navigateur et accedez à l'adresse:
+      -  Ouvrez votre navigateur et accedez à l'adresse:
    
    ```bash
        http://localhost:5534/
