@@ -33,27 +33,28 @@ Elle fonctionne avec springboot, postgres, postgis
    ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
   
    
-4. Accédez au répertoire du projet :
+3. Accédez au répertoire du projet :
 
    ```bash
    cd projet_SIG_IBAM
    ```
 
-5. Lancez l'application avec Docker Compose :
+4. Lancez l'application avec Docker Compose :
 
+   - Téléchargez les dépendances avec:
    ```bash
-       téléchargez les dépendances avec:
       "mvn install"
-       Lancez l'application avec:
+   ```
+   - Lancez l'application avec:
+   ```bash
       "java -jar target/geoapp-0.0.1-SNAPSHOT.jar"
    ```
-
    Cela démarre l'application sur le port 5534.
 
 6. Lancez l'application avec Docker Compose :
   
-   ```bash
        Ouvrez votre navigateur et accedez à l'adresse:
+   ```bash
        http://localhost:5534/
    ```
 
