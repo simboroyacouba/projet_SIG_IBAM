@@ -32,15 +32,18 @@ Elle fonctionne avec springboot, postgres, postgis
 4. Lancez l'application avec Docker Compose :
 
    ```bash
-       téléchargez les dépendances avec: "mvn install"
-       Lancez l'application avec: "java -jar target/geoapp-0.0.1-SNAPSHOT.jar"
+       téléchargez les dépendances avec:
+      "mvn install"
+       Lancez l'application avec:
+      "java -jar target/geoapp-0.0.1-SNAPSHOT.jar"
    ```
 
    Cela démarre l'application sur le port 5534.
 
 5. Lancez l'application avec Docker Compose :
+   Ouvrez votre navigateur et accedez à l'adresse:
    ```bash
-       Ouvrez votre navigateur et accedez à l'adresse:
+      
        http://localhost:5534/
    ```
 
