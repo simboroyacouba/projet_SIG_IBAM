@@ -18,18 +18,24 @@ Elle fonctionne avec springboot, postgres, postgis
 
 2. Crééz la base de donnée :
    
- ```bash
-   Crééz un utilisateur "user_geoapp_groupe7" avec le pot de passe "pass22"
-   Crééz la base de donnée "geoapp_groupe7" ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
+   Crééz un utilisateur
+   ```bash
+      user_geoapp_groupe7
+    ```
+   avec le pot de passe
+   ```bash
+      pass22
    ```
+   Crééz la base de donnée "geoapp_groupe7" ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
+  
    
-3. Accédez au répertoire du projet :
+4. Accédez au répertoire du projet :
 
    ```bash
    cd projet_SIG_IBAM
    ```
 
-4. Lancez l'application avec Docker Compose :
+5. Lancez l'application avec Docker Compose :
 
    ```bash
        téléchargez les dépendances avec:
@@ -40,7 +46,7 @@ Elle fonctionne avec springboot, postgres, postgis
 
    Cela démarre l'application sur le port 5534.
 
-5. Lancez l'application avec Docker Compose :
+6. Lancez l'application avec Docker Compose :
   
    ```bash
        Ouvrez votre navigateur et accedez à l'adresse:
