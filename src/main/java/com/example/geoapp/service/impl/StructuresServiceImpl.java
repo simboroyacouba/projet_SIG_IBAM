@@ -22,7 +22,7 @@ import com.example.geoapp.service.StructuresService;
 public class StructuresServiceImpl implements StructuresService {
 
     @Autowired
-    StructuresRepository waterConsuptionRepository;
+    StructuresRepository structuresRepository;
 
     public static <T> List<T> toList(final Iterable<T> iterable) {
         return StreamSupport.stream(iterable.spliterator(), false)
@@ -31,76 +31,77 @@ public class StructuresServiceImpl implements StructuresService {
 
     @Override
     public List<Structure> findAllStructures() {
-        return  toList(waterConsuptionRepository.findAll());
+        return  toList(structuresRepository.findAll());
     }
 
     @Override
     public Structure findStructuresById(Long id){
-        return  waterConsuptionRepository.findById(id).orElse(null);
+        return  structuresRepository.findById(id).orElse(null);
     }
 
     @Override
     public Structure findStructuresByName(String name){
-        return  waterConsuptionRepository.findById(1L).orElse(null);
+        return  structuresRepository.findById(1L).orElse(null);
     }
 
 
     public void saveCsv(){
         //read all data from table on store on response object
         List<Structure> structures = findAllStructures();
-        if(structures.isEmpty()){
-            System.out.println("La liste des structures est vide");
-            System.out.println("Début de l'initialisation");
 
-            String[] HEADERS = {"nom", "sigle", "responsable", "adresse", "email", "telephone", "siteWeb", "pageFacebook","Latitude", "Longitude"};
-            //String fileLocatiion = "C:\\workspace_nebrata\\Spring\\geoapp\\src\\main\\resources\\structures_data_old.csv";//"/home\\hp\\Workspace\\spring\\geoapp\\src\\main\\resources\\waterwatch_data.csv"
-            String fileLocatiion = Paths.get("src", "main", "resources", "structures_data.csv").toString();
+        System.out.println("La liste des structures est vide");
+        System.out.println("Début de l'initialisation");
 
-            try{
-                Reader in = new FileReader(fileLocatiion);
-                Iterable<CSVRecord> record = CSVFormat.newFormat(';')
-                        .withHeader(HEADERS)
-                        .withFirstRecordAsHeader()
-                        .parse(in);
-                for (CSVRecord record1 : record) {
-                    String nom = record1.get("nom");
-                    String sigle = record1.get("sigle");
-                    String responsable = record1.get("responsable");
-                    String adresse = record1.get("adresse");
-                    String email = record1.get("email");
-                    String telephone = record1.get("telephone");
-                    String siteWeb = record1.get("siteWeb");
-                    String pageFacebook = record1.get("pageFacebook");
-                    String latitude = record1.get("Latitude");
-                    String longitude = record1.get("Longitude");
+        String[] HEADERS = {"nom", "sigle", "responsable", "adresse", "email", "telephone", "siteWeb", "pageFacebook","Latitude", "Longitude"};
+        //String fileLocatiion = "C:\\workspace_nebrata\\Spring\\geoapp\\src\\main\\resources\\structures_data_old.csv";//"/home\\hp\\Workspace\\spring\\geoapp\\src\\main\\resources\\waterwatch_data.csv"
+        String fileLocatiion = Paths.get("src", "main", "resources", "structures_data.csv").toString();
 
-                    Double dLatitude = Double.valueOf(latitude);
-                    Double dLongitude = Double.valueOf(longitude);
+        try{
+            Reader in = new FileReader(fileLocatiion);
+            Iterable<CSVRecord> record = CSVFormat.newFormat(';')
+                    .withHeader(HEADERS)
+                    .withFirstRecordAsHeader()
+                    .parse(in);
+            for (CSVRecord record1 : record) {
+                String nom = record1.get("nom");
+                String sigle = record1.get("sigle");
+                String responsable = record1.get("responsable");
+                String adresse = record1.get("adresse");
+                String email = record1.get("email");
+                String telephone = record1.get("telephone");
+                String siteWeb = record1.get("siteWeb");
+                String pageFacebook = record1.get("pageFacebook");
+                String latitude = record1.get("Latitude");
+                String longitude = record1.get("Longitude");
 
-                    Point geom = new GeometryFactory().createPoint(new Coordinate(dLongitude, dLatitude));
+                Double dLatitude = Double.valueOf(latitude);
+                Double dLongitude = Double.valueOf(longitude);
 
-                    //load data
-                    Structure structure = new Structure();
-                    structure.setNom(nom);
-                    structure.setSigle(sigle);
-                    structure.setResponsable(responsable);
-                    structure.setAdresse(adresse);
-                    structure.setEmail(email);
-                    structure.setSiteWeb(siteWeb);
-                    structure.setPageFacebook(pageFacebook);
-                    structure.setTelephone(telephone);
-                    structure.setGeom(geom);
+                Point geom = new GeometryFactory().createPoint(new Coordinate(dLongitude, dLatitude));
 
-                    waterConsuptionRepository.save(structure);
+                //load data
+                Structure structure = new Structure();
+                structure.setNom(nom);
+                structure.setSigle(sigle);
+                structure.setResponsable(responsable);
+                structure.setAdresse(adresse);
+                structure.setEmail(email);
+                structure.setSiteWeb(siteWeb);
+                structure.setPageFacebook(pageFacebook);
+                structure.setTelephone(telephone);
+                structure.setGeom(geom);
+
+                if(structuresRepository.findByNom(structure.getNom()).isEmpty()){
+                    structuresRepository.save(structure);
                 }
 
-                System.out.println("les structures ont été initialisées");
-            }catch (IOException e){
-                e.printStackTrace();
             }
-        }else{
-            System.out.println("Data loaded");
+
+            System.out.println("les structures ont été initialisées");
+        }catch (IOException e){
+            e.printStackTrace();
         }
+
 
     }
 }

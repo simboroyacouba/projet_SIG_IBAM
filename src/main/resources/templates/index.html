@@ -176,6 +176,31 @@
 		            cpoints.on('mouseover', function(e) {
 		                this.openPopup()
 		            });
+					// Empêcher la fermeture si la souris est sur la popup elle-même
+					cpoints.getPopup().on('mouseover', function() {
+						cpoints.off('mouseout'); // Désactiver l'événement 'mouseout' temporairement
+					});
+
+					// Fermer le popup seulement lorsque la souris quitte le marqueur ET la popup
+					cpoints.on('mouseout', function(e) {
+						setTimeout(function() {
+							// Vérifie si la souris n'est plus sur le popup avant de fermer
+							if (!$(e.originalEvent.relatedTarget).closest('.leaflet-popup').length) {
+								cpoints.closePopup();
+							}
+						}, 100);
+					});
+
+					// Réactiver la fermeture du popup lorsque la souris quitte la popup
+					cpoints.getPopup().on('mouseout', function() {
+						cpoints.on('mouseout', function(e) {
+							cpoints.closePopup();
+						});
+					});
+
+					cpoints.on('click', function(e) {
+						setView(item.geom.coordinates[1], item.geom.coordinates[0]);
+					});
 		            class_layers.addLayer(cpoints);
 		        });
 			});
@@ -297,10 +322,33 @@
 				});
 			}
 
-			function setView( latitude, longitude) {
-				//Centrer la carte sur les coordonnées spécifiques
+
+			function setView(latitude, longitude) {
+				// Centrer la carte sur les coordonnées spécifiques
 				map.setView([latitude, longitude], 20);
+
+				// Icône personnalisée pour la localisation
+				var locationIcon = L.icon({
+
+					iconUrl: 'images/location_icon.png',  // Chemin vers l'icône de localisation
+					iconSize: [38, 38],  // Taille de l'icône
+					iconAnchor: [22, 38],  // Point de l'icône correspondant à la position
+					popupAnchor: [-3, -76]  // Point où apparaîtra le popup par rapport à l'icône
+				});
+
+				// Supprimer un marqueur précédent (si nécessaire)
+				if (window.currentMarker) {
+					map.removeLayer(window.currentMarker);
+				}
+
+				// Ajouter un marqueur sur la carte avec l'icône personnalisée
+				var marker = L.marker([latitude, longitude], {icon: locationIcon}).addTo(map);
+
+				// Stocker le marqueur dans une variable globale si tu souhaites le supprimer plus tard
+				window.currentMarker = marker;
+
 			}
+
 
 		</script>
 	</body>
