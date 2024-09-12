@@ -40,7 +40,7 @@ Elle fonctionne avec springboot, postgres, postgis
       cd projet_SIG_IBAM
    ```
 
-4. Lancez l'application avec Docker Compose :
+4. Lancez l'application :
 
    - Téléchargez les dépendances avec:
    ```bash
@@ -51,10 +51,8 @@ Elle fonctionne avec springboot, postgres, postgis
       java -jar target/geoapp-0.0.1-SNAPSHOT.jar
    ```
    Cela démarre l'application sur le port 5534.
-
-6. Lancez l'application :
   
-   Ouvrez votre navigateur et accedez à l'adresse:
+   - Ouvrez votre navigateur et accedez à l'adresse:
    
    ```bash
        http://localhost:5534/
