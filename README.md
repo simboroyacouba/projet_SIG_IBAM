@@ -18,15 +18,19 @@ Elle fonctionne avec springboot, postgres, postgis
 
 2. Crééz la base de donnée :
    
-   Crééz un utilisateur
+   - Crééz un utilisateur
    ```bash
       user_geoapp_groupe7
     ```
-   avec le pot de passe
+   avec le mot de passe
    ```bash
       pass22
    ```
-   Crééz la base de donnée "geoapp_groupe7" ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
+  - Crééz la base de donnée
+   ```bash
+      geoapp_groupe7 
+   ```
+   ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
   
    
 4. Accédez au répertoire du projet :
