@@ -18,7 +18,7 @@ Elle fonctionne avec springboot, postgres, postgis
 
 2. Crééz la base de donnée :
    
-   - Crééz un utilisateur
+ - Crééz un utilisateur
    ```bash
       user_geoapp_groupe7
     ```
