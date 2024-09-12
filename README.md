@@ -5,6 +5,7 @@ Elle fonctionne avec springboot, postgres, postgis
 ## Prérequis
 
 - Java 17
+- maven 3.9
 - Postgresql (14)
 - Postgis (3.4.2)
 
@@ -18,7 +19,7 @@ Elle fonctionne avec springboot, postgres, postgis
 
 2. Crééz la base de donnée :
    
- - Crééz un utilisateur
+   - Crééz un utilisateur
    ```bash
       user_geoapp_groupe7
     ```
@@ -26,7 +27,7 @@ Elle fonctionne avec springboot, postgres, postgis
    ```bash
       pass22
    ```
-  - Crééz la base de donnée
+   - Crééz la base de donnée
    ```bash
       geoapp_groupe7 
    ```
@@ -43,11 +44,11 @@ Elle fonctionne avec springboot, postgres, postgis
 
    - Téléchargez les dépendances avec:
    ```bash
-      "mvn install"
+      mvn install
    ```
    - Lancez l'application avec:
    ```bash
-      "java -jar target/geoapp-0.0.1-SNAPSHOT.jar"
+      java -jar target/geoapp-0.0.1-SNAPSHOT.jar
    ```
    Cela démarre l'application sur le port 5534.
 
