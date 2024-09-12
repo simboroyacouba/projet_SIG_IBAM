@@ -37,7 +37,7 @@ Elle fonctionne avec springboot, postgres, postgis
 3. Accédez au répertoire du projet :
 
    ```bash
-   cd projet_SIG_IBAM
+      cd projet_SIG_IBAM
    ```
 
 4. Lancez l'application avec Docker Compose :
@@ -52,9 +52,10 @@ Elle fonctionne avec springboot, postgres, postgis
    ```
    Cela démarre l'application sur le port 5534.
 
-6. Lancez l'application avec Docker Compose :
+6. Lancez l'application :
   
        Ouvrez votre navigateur et accedez à l'adresse:
+   
    ```bash
        http://localhost:5534/
    ```
