@@ -31,7 +31,7 @@ Elle fonctionne avec springboot, postgres, postgis
    ```bash
       geoapp_groupe7 
    ```
-   ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
+   - ajoutez l'extension postgis et faite de l'utilisateur "user_geoapp_groupe7" le owner de la DB
   
    
 3. Accédez au répertoire du projet :
