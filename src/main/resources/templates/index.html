@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+
+<html  lang="en" xmlns:tn="http://www.thymeleaf.org">
+
+<head>
+		<!-- Import Leaflet CSS -->
+		<link rel="stylesheet" th:href="@{app/leaflet/leaflet.css}">
+		<style>
+		    #map {
+		        height: calc(100vh - 0px) !important;
+		    }
+			.leaflet-container {  /* all maps */
+			    width:  100%;
+			    /* height: calc(100vh - 60px); */
+			    height: 100vh;
+			}
+			
+			.legend, .temporal-legend {
+			    padding: 6px 10px;
+			    font: 14px/16px Arial, Helvetica, sans-serif;
+			    background: rgba(0,0,0,0.85);
+			    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			    border-radius: 5px;
+			    color:whitesmoke;
+			}
+			
+			#legendTitle {
+			    text-align: center;
+			    margin-bottom: 15px;
+			    color: #0f0f0f;
+			    /* font-variant: small-caps; */
+			    font-weight: bold;
+			}
+			
+			.symbolsContainer {
+			    float: left;
+			    margin-left: 50px;
+			}
+			
+			.legendCircle {
+			    border-radius:50%;
+			    border: 1px solid #537898;
+			    background: rgba(0,128,128,0.5);
+			    display: inline-block;
+			}
+			
+			.legendValue {
+			    position: absolute;
+			    right: 12px;
+			    color: #0f0f0f;
+			    font-size:10pt;
+			    text-align:center;
+			    font-weight: bold;
+			}
+
+			
+			.info h5 {
+			    margin: 0 0 5px;
+			    color: #777;
+			    text-align: center;
+			    /* margin-bottom: 15px; */
+			    color: #0f0f0f;
+			    /* font-variant: small-caps; */
+			    font-weight: bold;
+			}
+
+
+			.leaflet-control-layers {
+			    float:right;
+			    top:500px;
+			    right:0;
+			    /* margin-left:-200px; */
+			    position:absolute;
+			    background: rgba(0,0,0,0.85);
+			    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+			    border-radius: 5px;
+			    color:whitesmoke;
+			}
+			/* Conteneur de la légende */
+			.info {
+				width: 100% !important;
+				max-width: 500px;
+				background-color: white;
+				padding: 10px;
+				border-radius: 5px;
+				box-shadow: 0 0 15px rgba(0,0,0,0.2);
+				width: 250px; /* Ajustez la largeur selon vos besoins */
+				max-height: 400px; /* Ajustez la hauteur maximale */
+				overflow-y: auto; /* Active le défilement vertical */
+				overflow-x: hidden; /* Cache l'overflow horizontal */
+			}
+
+			/* Liste des structures */
+			.info ul {
+				padding: 0;
+				margin: 0;
+				list-style-type: none;
+			}
+
+			.info ul li {
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				padding: 5px;
+				border-bottom: 1px solid #ccc;
+				cursor: pointer;
+			}
+		</style>
+	</head>
+	<body layout:fragment="content">
+		<!-- Import Leaflet JS -->
+		<script th:src="@{app/jquery/dist/jquery.min.js}"></script>
+		<script th:src="@{app/leaflet/leaflet.js}"></script>
+		<script th:src="@{app/extscripts/js/Chart.js}"></script>
+		
+		<div id="map"></div>
+		
+		<script type="text/javascript">
+			
+			// Url Endpoints
+			var dataUrl = "http://localhost:5534/structures/all";
+			
+			// Basemap urls
+			var osm_humanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			});
+			
+			var osm_map = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+			});
+			var esri_dark_gray_base = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+				attribution: '&copy; <a href="http://services.arcgisonline.com/arcgis/rest/services">ESRI</a> arcgisonline'
+			});
+			var world_street_map = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+			});
+			var world_imagery = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+			});
+			
+			// Initialize the map
+			var map = L.map('map', {
+				layers: [osm_humanitarian] // Default basemap
+			}).setView([12.373, -1.517], 11)
+						// Initialize basemaps
+		    var baseLayers = {
+		        "Open Street Map": osm_map,
+		        "OSM Humanitarian": osm_humanitarian,
+		        "Dark Gray Base": esri_dark_gray_base,
+		        "World Street Map": world_street_map,
+		        "World Imagery": world_imagery
+		    };
+		    
+		    // Create layer groups
+		    var point_layers = L.layerGroup().addTo(map);
+		    var class_layers = L.layerGroup().addTo(map);
+
+			$.getJSON(dataUrl, function(data) {
+				$.each(data, function(i, item) {
+					var cpoints = L.circle(L.latLng(item.geom.coordinates[1], item.geom.coordinates[0]), {
+						color: 'green',
+						radius: 10,
+						weight: 1.0,
+						fillOpacity: 0.7
+					});
+
+		            cpoints.bindPopup(
+							"<h4><b>" + item.nom.toString() +"("+item.sigle.toString() +")"+"</b></h4>" +
+							(item.siteWeb ? "<h4><a target='_blank' href='"+ item.siteWeb.toString() +"'><b>Site web</b></a> </h4>":"<p>Site web non renseigné</p>" )+
+							(item.pageFacebook ? "<h4><a target='_blank' href='"+ item.pageFacebook.toString() +"'><b>Page facebook</b></a> </h4>":"<p>Page facebook non renseigné</p>" )+
+							(item.email ? "<h4><b>Email: "+ item.email.toString() +"</b></h4>":"<p>Adresse email non renseigné</p>" ) +
+							(item.adresse ? "<h4><b>Adresse: "+ item.adresse.toString() +"</b></h4>":"<p>Adresse non renseigné'</p>" ) +
+							(item.telephone ? "<h4><b>Contact: "+ item.telephone.toString() +"</b></h4>":"<p>Téléphone non renseigné</p>" )
+
+					);
+		            cpoints.on('mouseover', function(e) {
+		                this.openPopup()
+		            });
+		            class_layers.addLayer(cpoints);
+		        });
+			});
+			
+			var overlayMaps = {
+				// "Water Consumption by Suburb (2017)": point_layers,
+				// "Consumption Classification by Suburb (2017)": class_layers
+			}
+		    
+		    // Add the layers control
+		    L.control.layers(baseLayers, overlayMaps).addTo(map);
+		    
+		    // Create Legend
+
+	        barChartLegend();
+	        function barChartLegend() {
+
+		      var info = L.control({position: 'topright'});
+		      info.onAdd = function(map) {
+		        var div = L.DomUtil.create('div', 'info');
+		        div.innerHTML += '<h5>Liste des structures</h5>';
+		        div.innerHTML += '<div id="info"></div>';
+		
+		        return div;
+		      };
+		
+		      info.addTo(map);
+		    }
+			displayDataList();
+			function displayDataList() {
+				var x_labels = [];
+				var y_data = [];
+				var latitude_data = [];
+				var longitude_data = [];
+				$.ajax({
+					url: "/structures/all",
+					cache: "false",
+					dataType: "text",
+					type: "GET",
+
+					success: function(data) {
+						var obj = JSON.parse(data);
+
+						obj.forEach(o => {
+							x_labels.push(o.nom);
+						});
+
+						obj.forEach(o => {
+							y_data.push(o.sigle);
+						});
+						obj.forEach(o => {
+							latitude_data.push(o.geom.coordinates[1]);
+						});obj.forEach(o => {
+							longitude_data.push(o.geom.coordinates[0]);
+						});
+
+						// Création de la liste
+						var listContainer = document.getElementById("info");
+						var ul = document.createElement("ul");
+
+						for (var i = 0; i < x_labels.length; i++) {
+							var li = document.createElement("li");
+							li.textContent = x_labels[i] + (y_data[i] ? " (" + y_data[i] + ")" : "");
+
+							// Capture les données spécifiques à cet itération dans une fonction anonyme
+							li.onclick = (function(lat, lon) {
+								return function() {
+									setView(lat, lon);  // Appelle setView avec les valeurs spécifiques lors du clic
+								};
+							})(latitude_data[i], longitude_data[i]);
+
+
+							// Crée le popup lors du survol de la souris
+							li.onmouseover = (function(i) {
+								return function(e) {
+									// Créer un élément popup
+									var popup = document.createElement("div");
+									popup.style.position = "absolute";
+									popup.style.backgroundColor = "white";
+									popup.style.padding = "10px";
+									popup.style.borderRadius = "5px";
+									popup.style.boxShadow = "0px 0px 10px rgba(0,0,0,0.5)";
+									popup.style.zIndex = "1000";
+									popup.innerHTML = "<h4><b>" + x_labels[i] + "</b></h4><p>" + y_data[i] + "</p>";
+
+									// Positionner le popup près du curseur
+									popup.style.left = (e.pageX + 10) + "px";
+									popup.style.top = (e.pageY + 10) + "px";
+
+									// Ajouter un identifiant unique au popup pour pouvoir le supprimer
+									popup.id = "popup-" + i;
+
+									// Ajouter le popup au body
+									document.body.appendChild(popup);
+								};
+							})(i);
+
+							// Supprimer le popup lors du mouseout
+							li.onmouseout = (function(i) {
+								return function() {
+									var popup = document.getElementById("popup-" + i);
+									if (popup) {
+										document.body.removeChild(popup);
+									}
+								};
+							})(i);
+
+							ul.appendChild(li);
+						}
+
+						// Insérer la liste dans le conteneur
+						listContainer.innerHTML = ""; // Effacer tout contenu précédent
+						listContainer.appendChild(ul);
+					},
+
+					error: function(data) {
+						alert('error; ' + eval(error));
+					}
+				});
+			}
+
+			function setView( latitude, longitude) {
+				//Centrer la carte sur les coordonnées spécifiques
+				map.setView([latitude, longitude], 20);
+			}
+
+		</script>
+	</body>
+</html>
