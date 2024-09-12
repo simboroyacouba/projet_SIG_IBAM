@@ -41,9 +41,9 @@ Elle fonctionne avec springboot, postgres, postgis
    Cela démarre l'application sur le port 5534.
 
 5. Lancez l'application avec Docker Compose :
-   Ouvrez votre navigateur et accedez à l'adresse:
+  
    ```bash
-      
+       Ouvrez votre navigateur et accedez à l'adresse:
        http://localhost:5534/
    ```
 
