@@ -1,4 +1,4 @@
-# Application de localisation des services affiliés au Misnistère des Sports et des loisirs
+# Application de localisation des services affiliés au Ministère des Sports de la Jeunesse et de l'Emploi
 Elle fonctionne avec springboot, postgres, postgis
 
 
