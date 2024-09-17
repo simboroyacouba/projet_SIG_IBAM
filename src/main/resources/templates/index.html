@@ -14,7 +14,7 @@
 			    /* height: calc(100vh - 60px); */
 			    height: 100vh;
 			}
-			
+
 			.legend, .temporal-legend {
 			    padding: 6px 10px;
 			    font: 14px/16px Arial, Helvetica, sans-serif;
@@ -23,7 +23,7 @@
 			    border-radius: 5px;
 			    color:whitesmoke;
 			}
-			
+
 			#legendTitle {
 			    text-align: center;
 			    margin-bottom: 15px;
@@ -31,19 +31,19 @@
 			    /* font-variant: small-caps; */
 			    font-weight: bold;
 			}
-			
+
 			.symbolsContainer {
 			    float: left;
 			    margin-left: 50px;
 			}
-			
+
 			.legendCircle {
 			    border-radius:50%;
 			    border: 1px solid #537898;
 			    background: rgba(0,128,128,0.5);
 			    display: inline-block;
 			}
-			
+
 			.legendValue {
 			    position: absolute;
 			    right: 12px;
@@ -53,7 +53,7 @@
 			    font-weight: bold;
 			}
 
-			
+
 			.info h5 {
 			    margin: 0 0 5px;
 			    color: #777;
@@ -79,6 +79,7 @@
 			/* Conteneur de la légende */
 			.info {
 				width: 100% !important;
+				margin-top: 300px;
 				max-width: 500px;
 				background-color: white;
 				padding: 10px;
@@ -105,6 +106,24 @@
 				border-bottom: 1px solid #ccc;
 				cursor: pointer;
 			}
+			#selectStructures {
+				background-color: #007bff;
+				color: white;
+				border: none;
+				padding: 10px;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+
+			#distance{
+				background-color: #007bff;
+				color: white;
+				border: none;
+				padding: 10px;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+
 		</style>
 	</head>
 	<body layout:fragment="content">
@@ -112,19 +131,19 @@
 		<script th:src="@{app/jquery/dist/jquery.min.js}"></script>
 		<script th:src="@{app/leaflet/leaflet.js}"></script>
 		<script th:src="@{app/extscripts/js/Chart.js}"></script>
-		
+
 		<div id="map"></div>
-		
-		<script type="text/javascript">
-			
+
+	<script type="text/javascript">
+
 			// Url Endpoints
 			var dataUrl = "http://localhost:5534/structures/all";
-			
+
 			// Basemap urls
 			var osm_humanitarian = L.tileLayer('http://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			});
-			
+
 			var osm_map = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 			});
@@ -137,7 +156,7 @@
 			var world_imagery = L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
 				attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
 			});
-			
+
 			// Initialize the map
 			var map = L.map('map', {
 				layers: [osm_humanitarian] // Default basemap
@@ -150,7 +169,7 @@
 		        "World Street Map": world_street_map,
 		        "World Imagery": world_imagery
 		    };
-		    
+
 		    // Create layer groups
 		    var point_layers = L.layerGroup().addTo(map);
 		    var class_layers = L.layerGroup().addTo(map);
@@ -204,15 +223,66 @@
 		            class_layers.addLayer(cpoints);
 		        });
 			});
-			
+
 			var overlayMaps = {
 				// "Water Consumption by Suburb (2017)": point_layers,
 				// "Consumption Classification by Suburb (2017)": class_layers
 			}
-		    
+
 		    // Add the layers control
 		    L.control.layers(baseLayers, overlayMaps).addTo(map);
-		    
+
+			// Fonction pour afficher ou masquer la div
+			function toggleDistanceCalculator() {
+				var infoDiv = document.getElementById('distanceCalculatorDiv');
+				if (infoDiv.style.display === 'none' || !infoDiv.style.display) {
+					infoDiv.style.display = 'block'; // Affiche la div
+				} else {
+					infoDiv.style.display = 'none'; // Masque la div
+				}
+			}
+
+
+			 calculDistance();
+			function calculDistance() {
+				var structures;
+				$.getJSON(dataUrl, function(data) {
+					structures = data;
+					console.log(structures);
+				var info = L.control({position: 'topright'});
+				info.onAdd = function(map) {
+					var div = L.DomUtil.create('div', 'info' );
+					div.innerHTML += '<button id="distance" onclick="toggleDistanceCalculator()" >Calculer la distance entre deux structures</button>';
+					div.innerHTML += '<div id="distanceCalculatorDiv" style="display:none;">' +
+							'<h5>Calculer la distance entre deux structures</h5>'+
+							'<h4>Sélectionner deux structures</h4>' +
+							'<select id="structureSelect1" onchange="updateSelectedStructures()">' +
+							'<option value="">Choisir une structure...</option>' +
+							structures.map(function(structure) {
+								return '<option value="' + structure.id + '">' + structure.nom + '</option>';
+							}).join('') +
+							'</select>' +
+							'<br/><br/>' +
+							'<select id="structureSelect2" onchange="updateSelectedStructures()">' +
+							'<option value="">Choisir une structure...</option>' +
+							structures.map(function(structure) {
+								return '<option value="' + structure.id + '">' + structure.nom + '</option>';
+							}).join('') +
+							'</select>' +
+							'<br/><br/>' +
+							'<button onclick="calculateSelectedDistance()">Calculer Distance</button>' +
+							'<div id="distanceResult"></div>' +
+							'</div>';
+
+
+					return div;
+				};
+
+				info.addTo(map);
+			});
+			}
+
+
 		    // Create Legend
 
 	        barChartLegend();
@@ -223,10 +293,10 @@
 		        var div = L.DomUtil.create('div', 'info');
 		        div.innerHTML += '<h5>Liste des structures</h5>';
 		        div.innerHTML += '<div id="info"></div>';
-		
+
 		        return div;
 		      };
-		
+
 		      info.addTo(map);
 		    }
 			displayDataList();
@@ -347,6 +417,71 @@
 				// Stocker le marqueur dans une variable globale si tu souhaites le supprimer plus tard
 				window.currentMarker = marker;
 
+			}
+			var structures;
+			$.getJSON(dataUrl, function(data) {
+				structures = data;
+			});
+			// document.getElementById('selectStructures').onclick = function() {
+			//
+			// 			console.log(structures)
+			//
+			// 			var popupContent = '<div id="distance" class="popup">' +
+			// 					'<h4>Sélectionner deux structures</h4>' +
+			// 					'<select id="structureSelect1" onchange="updateSelectedStructures()">' +
+			// 					'<option value="">Choisir une structure...</option>' +
+			// 					structures.map(function(structure) {
+			// 						return '<option value="' + structure.id + '">' + structure.nom + '</option>';
+			// 					}).join('') +
+			// 					'</select>' +
+			// 					'<br/><br/>' +
+			// 					'<select id="structureSelect2" onchange="updateSelectedStructures()">' +
+			// 					'<option value="">Choisir une structure...</option>' +
+			// 					structures.map(function(structure) {
+			// 						return '<option value="' + structure.id + '">' + structure.nom + '</option>';
+			// 					}).join('') +
+			// 					'</select>' +
+			// 					'<br/><br/>' +
+			// 					'<button onclick="calculateSelectedDistance()">Calculer Distance</button>' +
+			// 					'<div id="distanceResult"></div>' +
+			// 					'</div>';
+			//
+			// 			var popup = L.popup()
+			// 					.setLatLng(map.getCenter())
+			// 					.setContent(popupContent)
+			// 					.openOn(map);
+			//
+			// };
+
+
+			function updateSelectedStructures() {
+				var select1 = document.getElementById('structureSelect1');
+				var select2 = document.getElementById('structureSelect2');
+				var id1 = select1.value;
+				var id2 = select2.value;
+
+				selectedStructures = [id1, id2].map(function(id) {
+					return structures.find(function(structure) {
+						return structure.id === parseInt(id);
+					});
+				});
+				console.log(selectedStructures);
+			}
+
+			function calculateSelectedDistance() {
+				if (selectedStructures.length === 2) {
+					var s1 = selectedStructures[0];
+					var s2 = selectedStructures[1];
+					var distance = calculateDistance(s1.geom.coordinates[1], s1.geom.coordinates[0], s2.geom.coordinates[1], s2.geom.coordinates[0]);
+					document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
+				} else {
+					document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
+				}
+			}
+			function calculateDistance(lat1, lon1, lat2, lon2) {
+				var point1 = L.latLng(lat1, lon1);
+				var point2 = L.latLng(lat2, lon2);
+				return point1.distanceTo(point2); // Distance en mètres
 			}
 
 
