@@ -31,7 +31,7 @@ public class StructuresServiceImpl implements StructuresService {
 
     @Override
     public List<Structure> findAllStructures() {
-        return  toList(structuresRepository.findAll());
+        return  toList(structuresRepository.findAllByOrderByNumeroAsc());
     }
 
     @Override
@@ -54,7 +54,7 @@ public class StructuresServiceImpl implements StructuresService {
         }
         System.out.println("\n ---------Début de l'initialisation des structures---------");
 
-        String[] HEADERS = {"nom", "sigle", "responsable", "adresse", "email", "telephone", "siteWeb", "pageFacebook","Latitude", "Longitude"};
+        String[] HEADERS = {"nom", "sigle", "responsable", "adresse", "email", "telephone", "siteWeb", "pageFacebook", "numero","Latitude", "Longitude"};
         //String fileLocatiion = "C:\\workspace_nebrata\\Spring\\geoapp\\src\\main\\resources\\structures_data_old.csv";//"/home\\hp\\Workspace\\spring\\geoapp\\src\\main\\resources\\waterwatch_data.csv"
         String fileLocatiion = Paths.get("src", "main", "resources", "structures_data.csv").toString();
 
@@ -73,9 +73,11 @@ public class StructuresServiceImpl implements StructuresService {
                 String telephone = record1.get("telephone");
                 String siteWeb = record1.get("siteWeb");
                 String pageFacebook = record1.get("pageFacebook");
+                String numeroString = record1.get("numero");
                 String latitude = record1.get("Latitude");
                 String longitude = record1.get("Longitude");
 
+                int numero = Integer.valueOf(numeroString);
                 Double dLatitude = Double.valueOf(latitude);
                 Double dLongitude = Double.valueOf(longitude);
 
@@ -91,6 +93,7 @@ public class StructuresServiceImpl implements StructuresService {
                 structure.setSiteWeb(siteWeb);
                 structure.setPageFacebook(pageFacebook);
                 structure.setTelephone(telephone);
+                structure.setNumero(numero);
                 structure.setGeom(geom);
 
                 if(structuresRepository.findByNom(structure.getNom()).isEmpty()){

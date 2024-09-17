@@ -49,6 +49,9 @@ import java.io.Serializable;
     @Column(name = "pagefacebook")
     private String pageFacebook;
 
+    @Column(name = "numero")
+    private int numero;
+
     @Column(name = "geom")
     private Point geom;
 

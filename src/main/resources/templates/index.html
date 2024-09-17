@@ -355,6 +355,7 @@
 			displayDataList();
 			function displayDataList() {
 				var x_labels = [];
+				var numero_data = [];
 				var y_data = [];
 				var latitude_data = [];
 				var longitude_data = [];
@@ -370,6 +371,7 @@
 						obj.forEach(o => {
 							x_labels.push(o.nom);
 							y_data.push(o.sigle);
+							numero_data.push(o.numero)
 							latitude_data.push(o.geom.coordinates[1]);
 							longitude_data.push(o.geom.coordinates[0]);
 						});
@@ -380,7 +382,7 @@
 
 						for (var i = 0; i < x_labels.length; i++) {
 							var li = document.createElement("li");
-							li.textContent = x_labels[i] + (y_data[i] ? " (" + y_data[i] + ")" : "");
+							li.textContent = numero_data[i] +") "+ x_labels[i] + (y_data[i] ? " (" + y_data[i] + ")" : "");
 
 							// Capture les données spécifiques à cet itération dans une fonction anonyme
 							li.onclick = (function(lat, lon) {
