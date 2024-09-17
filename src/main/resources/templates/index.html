@@ -177,6 +177,7 @@
 
 		            cpoints.bindPopup(
 							"<h4><b>" + item.nom.toString() +"("+item.sigle.toString() +")"+"</b></h4>" +
+							(item.responsable ? "<h4>Responsable : "+item.responsable.toString()+"</b></b> </h4>":"<p>Responsable non renseigné</p>" )+
 							(item.siteWeb ? "<h4><a target='_blank' href='"+ item.siteWeb.toString() +"'><b>Site web</b></a> </h4>":"<p>Site web non renseigné</p>" )+
 							(item.pageFacebook ? "<h4><a target='_blank' href='"+ item.pageFacebook.toString() +"'><b>Page facebook</b></a> </h4>":"<p>Page facebook non renseigné</p>" )+
 							(item.email ? "<h4><b>Email: "+ item.email.toString() +"</b></h4>":"<p>Adresse email non renseigné</p>" ) +
@@ -187,27 +188,27 @@
 		            cpoints.on('mouseover', function(e) {
 		                this.openPopup()
 		            });
-					// Empêcher la fermeture si la souris est sur la popup elle-même
-					cpoints.getPopup().on('mouseover', function() {
-						cpoints.off('mouseout'); // Désactiver l'événement 'mouseout' temporairement
-					});
-
-					// Fermer le popup seulement lorsque la souris quitte le marqueur ET la popup
-					cpoints.on('mouseout', function(e) {
-						setTimeout(function() {
-							// Vérifie si la souris n'est plus sur le popup avant de fermer
-							if (!$(e.originalEvent.relatedTarget).closest('.leaflet-popup').length) {
-								cpoints.closePopup();
-							}
-						}, 100);
-					});
-
-					// Réactiver la fermeture du popup lorsque la souris quitte la popup
-					cpoints.getPopup().on('mouseout', function() {
-						cpoints.on('mouseout', function(e) {
-							cpoints.closePopup();
-						});
-					});
+					// // Empêcher la fermeture si la souris est sur la popup elle-même
+					// cpoints.getPopup().on('mouseover', function() {
+					// 	cpoints.off('mouseout'); // Désactiver l'événement 'mouseout' temporairement
+					// });
+					//
+					// // Fermer le popup seulement lorsque la souris quitte le marqueur ET la popup
+					// cpoints.on('mouseout', function(e) {
+					// 	setTimeout(function() {
+					// 		// Vérifie si la souris n'est plus sur le popup avant de fermer
+					// 		if (!$(e.originalEvent.relatedTarget).closest('.leaflet-popup').length) {
+					// 			cpoints.closePopup();
+					// 		}
+					// 	}, 100);
+					// });
+					//
+					// // Réactiver la fermeture du popup lorsque la souris quitte la popup
+					// cpoints.getPopup().on('mouseout', function() {
+					// 	cpoints.on('mouseout', function(e) {
+					// 		cpoints.closePopup();
+					// 	});
+					// });
 
 					cpoints.on('click', function(e) {
 						setView(item.geom.coordinates[1], item.geom.coordinates[0]);
@@ -290,7 +291,8 @@
 		      var info = L.control({position: 'topright'});
 		      info.onAdd = function(map) {
 		        var div = L.DomUtil.create('div', 'info');
-		        div.innerHTML += '<h5 onclick="toggleInfoStructures()">Liste des structures</h5>';
+		        div.innerHTML += '<h5 onclick="toggleInfoStructures()">Liste des structures</h5>'+
+				  '<input type="text" id="searchBox" placeholder="Rechercher..." onkeyup="filterList()">';
 		        div.innerHTML += '<div id="info"></div>';
 
 		        return div;
@@ -315,14 +317,8 @@
 
 						obj.forEach(o => {
 							x_labels.push(o.nom);
-						});
-
-						obj.forEach(o => {
 							y_data.push(o.sigle);
-						});
-						obj.forEach(o => {
 							latitude_data.push(o.geom.coordinates[1]);
-						});obj.forEach(o => {
 							longitude_data.push(o.geom.coordinates[0]);
 						});
 
@@ -340,7 +336,6 @@
 									setView(lat, lon);  // Appelle setView avec les valeurs spécifiques lors du clic
 								};
 							})(latitude_data[i], longitude_data[i]);
-
 
 							// Crée le popup lors du survol de la souris
 							li.onmouseover = (function(i) {
@@ -391,6 +386,21 @@
 				});
 			}
 
+			function filterList() {
+				var input = document.getElementById("searchBox");
+				var filter = input.value.toUpperCase();
+				var ul = document.querySelector("#info ul");
+				var li = ul.getElementsByTagName("li");
+
+				for (var i = 0; i < li.length; i++) {
+					var txtValue = li[i].textContent || li[i].innerText;
+					if (txtValue.toUpperCase().indexOf(filter) > -1) {
+						li[i].style.display = "";
+					} else {
+						li[i].style.display = "none";
+					}
+				}
+			}
 
 			function setView(latitude, longitude) {
 				// Centrer la carte sur les coordonnées spécifiques
