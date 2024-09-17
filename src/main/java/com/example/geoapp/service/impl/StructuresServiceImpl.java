@@ -49,8 +49,10 @@ public class StructuresServiceImpl implements StructuresService {
         //read all data from table on store on response object
         List<Structure> structures = findAllStructures();
 
-        System.out.println("La liste des structures est vide");
-        System.out.println("Début de l'initialisation");
+        if(structures.isEmpty()){
+            System.out.println("La liste des structures est vide");
+        }
+        System.out.println("\n ---------Début de l'initialisation des structures---------");
 
         String[] HEADERS = {"nom", "sigle", "responsable", "adresse", "email", "telephone", "siteWeb", "pageFacebook","Latitude", "Longitude"};
         //String fileLocatiion = "C:\\workspace_nebrata\\Spring\\geoapp\\src\\main\\resources\\structures_data_old.csv";//"/home\\hp\\Workspace\\spring\\geoapp\\src\\main\\resources\\waterwatch_data.csv"
@@ -97,7 +99,7 @@ public class StructuresServiceImpl implements StructuresService {
 
             }
 
-            System.out.println("les structures ont été initialisées");
+            System.out.println(" ------------les structures ont été initialisées-----------");
         }catch (IOException e){
             e.printStackTrace();
         }

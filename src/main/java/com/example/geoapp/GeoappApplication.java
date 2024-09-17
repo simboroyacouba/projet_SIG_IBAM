@@ -18,7 +18,10 @@ StructuresServiceImpl structuresService;
 	@Bean
 	public CommandLineRunner runAtStartup() {
 		return args -> {
-			System.out.println("L'application GeoApp a démarré avec succès !");
+
+			System.out.println("***********************************************************");
+			System.out.println("*      L'application GeoApp a démarré avec succès !       *");
+			System.out.println("***********************************************************");
 			structuresService.saveCsv();
 		};
 	}

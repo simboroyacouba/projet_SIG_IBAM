@@ -15,27 +15,27 @@ import java.util.List;
 public class StructuresController {
 
     @Autowired
-    private StructuresService waterConsuptionService;
+    private StructuresService structuresService;
 
 
 
     @GetMapping(path = "/all")
     public List<Structure> findAll(){
-        return waterConsuptionService.findAllStructures();
+        return structuresService.findAllStructures();
     }
 
     @RequestMapping(value = "/{idStructure}", method = RequestMethod.GET)
     public Structure findStructuresById(Long idStructure){
-        return waterConsuptionService.findStructuresById(idStructure);
+        return structuresService.findStructuresById(idStructure);
     }
 
     @RequestMapping(value = "/{name}", method = RequestMethod.GET)
     public Structure findStructuresByName(String name){
-        return waterConsuptionService.findStructuresByName(name);
+        return structuresService.findStructuresByName(name);
     }
 
     @GetMapping(path = "/ini")
     public void initialize(){
-        waterConsuptionService.saveCsv();
+        structuresService.saveCsv();
     }
 }

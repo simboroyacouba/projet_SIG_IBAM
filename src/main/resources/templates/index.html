@@ -80,7 +80,7 @@
 			.info {
 				width: 100% !important;
 				margin-top: 300px;
-				max-width: 500px;
+				max-width: 400px;
 				background-color: white;
 				padding: 10px;
 				border-radius: 5px;
@@ -104,14 +104,6 @@
 				text-overflow: ellipsis;
 				padding: 5px;
 				border-bottom: 1px solid #ccc;
-				cursor: pointer;
-			}
-			#selectStructures {
-				background-color: #007bff;
-				color: white;
-				border: none;
-				padding: 10px;
-				border-radius: 5px;
 				cursor: pointer;
 			}
 
@@ -232,9 +224,17 @@
 		    // Add the layers control
 		    L.control.layers(baseLayers, overlayMaps).addTo(map);
 
-			// Fonction pour afficher ou masquer la div
 			function toggleDistanceCalculator() {
 				var infoDiv = document.getElementById('distanceCalculatorDiv');
+				if (infoDiv.style.display === 'none' || !infoDiv.style.display) {
+					infoDiv.style.display = 'block'; // Affiche la div
+				} else {
+					infoDiv.style.display = 'none'; // Masque la div
+				}
+			}
+
+			function toggleInfoStructures() {
+				var infoDiv = document.getElementById('info');
 				if (infoDiv.style.display === 'none' || !infoDiv.style.display) {
 					infoDiv.style.display = 'block'; // Affiche la div
 				} else {
@@ -248,13 +248,12 @@
 				var structures;
 				$.getJSON(dataUrl, function(data) {
 					structures = data;
-					console.log(structures);
 				var info = L.control({position: 'topright'});
 				info.onAdd = function(map) {
 					var div = L.DomUtil.create('div', 'info' );
-					div.innerHTML += '<button id="distance" onclick="toggleDistanceCalculator()" >Calculer la distance entre deux structures</button>';
+					div.innerHTML += '<i class="fas fa-calculator" style="cursor: pointer;" onclick="toggleDistanceCalculator()" ></i>';
+					div.innerHTML += '<h5 onclick="toggleDistanceCalculator()">Calculer la distance entre deux structures</h5>';
 					div.innerHTML += '<div id="distanceCalculatorDiv" style="display:none;">' +
-							'<h5>Calculer la distance entre deux structures</h5>'+
 							'<h4>Sélectionner deux structures</h4>' +
 							'<select id="structureSelect1" onchange="updateSelectedStructures()">' +
 							'<option value="">Choisir une structure...</option>' +
@@ -291,7 +290,7 @@
 		      var info = L.control({position: 'topright'});
 		      info.onAdd = function(map) {
 		        var div = L.DomUtil.create('div', 'info');
-		        div.innerHTML += '<h5>Liste des structures</h5>';
+		        div.innerHTML += '<h5 onclick="toggleInfoStructures()">Liste des structures</h5>';
 		        div.innerHTML += '<div id="info"></div>';
 
 		        return div;
@@ -435,58 +434,60 @@
 						return structure.id === parseInt(id);
 					});
 				});
-				console.log(selectedStructures);
 			}
 
-			// function calculateSelectedDistance() {
-			// 	if (selectedStructures.length === 2) {
-			// 		var s1 = selectedStructures[0];
-			// 		var s2 = selectedStructures[1];
-			// 		var distance = calculateDistance(s1.geom.coordinates[1], s1.geom.coordinates[0], s2.geom.coordinates[1], s2.geom.coordinates[0]);
-			// 		document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
-			// 	} else {
-			// 		document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
-			// 	}
-			// }
-
-			// function calculateSelectedDistance() {
-			// 	if (selectedStructures.length === 2) {
-			// 		var s1 = selectedStructures[0];
-			// 		var s2 = selectedStructures[1];
-			//
-			// 		// Calculer la distance entre les deux structures
-			// 		var distance = calculateDistance(
-			// 				s1.geom.coordinates[1], s1.geom.coordinates[0],
-			// 				s2.geom.coordinates[1], s2.geom.coordinates[0]
-			// 		);
-			// 		document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
-			//
-			// 		// Ajouter une ligne entre les deux points sur la carte
-			// 		var latlngs = [
-			// 			[s1.geom.coordinates[1], s1.geom.coordinates[0]], // Premier point (s1)
-			// 			[s2.geom.coordinates[1], s2.geom.coordinates[0]]  // Second point (s2)
-			// 		];
-			//
-			// 		// Supprimer la ligne précédente si elle existe (optionnel)
-			// 		if (window.currentLine) {
-			// 			map.removeLayer(window.currentLine);
-			// 		}
-			//
-			// 		// Créer une polyligne entre les deux points et l'ajouter à la carte
-			// 		var polyline = L.polyline(latlngs, {color: 'blue', weight: 3}).addTo(map);
-			//
-			// 		// Stocker la polyligne dans une variable globale pour pouvoir la supprimer plus tard si besoin
-			// 		window.currentLine = polyline;
-			//
-			// 	} else {
-			// 		document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
-			// 	}
-			// }
 			function calculateDistance(lat1, lon1, lat2, lon2) {
 				var point1 = L.latLng(lat1, lon1);
 				var point2 = L.latLng(lat2, lon2);
 				return point1.distanceTo(point2); // Distance en mètres
 			}
+
+			function calculateRouteDistance(lat1, lon1, lat2, lon2) {
+				var url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+
+				// Appel à l'API de routage OSRM
+				$.getJSON(url, function(data) {
+					if (data && data.routes && data.routes.length > 0) {
+						var route = data.routes[0];
+						var distance = route.distance;  // La distance est en mètres
+
+						// Afficher la distance dans le DOM
+						document.getElementById('distanceResult').innerText = "Distance (suivant la route): " + (distance / 1000).toFixed(2) + " km";
+
+						// Calculer et afficher la distance en ligne droite (optionnel)
+						var distance = calculateDistance(lat1, lon1, lat2, lon2);
+						document.getElementById('distanceResult').innerText += "\nDistance (ligne droite): " + distance.toFixed(2) + " mètres";
+
+						// Supprimer le trajet précédent s'il existe
+						if (window.currentRoute) {
+							map.removeLayer(window.currentRoute);
+						}
+
+						// Récupérer la géométrie (les coordonnées de l'itinéraire)
+						var coordinates = route.geometry.coordinates.map(function(coord) {
+							return [coord[1], coord[0]];  // Inverser [lon, lat] en [lat, lon]
+						});
+
+						// Créer un polyligne pour afficher l'itinéraire
+						var routeLine = L.polyline(coordinates, {
+							color: 'blue',
+							weight: 4,
+							opacity: 0.7,
+							lineJoin: 'round'
+						}).addTo(map);
+
+						// Stocker le polyligne dans une variable globale pour le supprimer plus tard
+						window.currentRoute = routeLine;
+
+						// Zoomer sur l'itinéraire
+						map.fitBounds(routeLine.getBounds());
+
+					} else {
+						document.getElementById('distanceResult').innerText = "Erreur lors du calcul de la distance routière.";
+					}
+				});
+			}
+
 
 
 			function calculateSelectedDistance() {
@@ -494,49 +495,16 @@
 					var s1 = selectedStructures[0];
 					var s2 = selectedStructures[1];
 
-					// Appeler la fonction pour calculer l'itinéraire en suivant les routes
-					calculateRouteBetweenPoints(
+					// Appel pour calculer la distance routière
+					calculateRouteDistance(
 							s1.geom.coordinates[1], s1.geom.coordinates[0],
 							s2.geom.coordinates[1], s2.geom.coordinates[0]
 					);
-
-					// Calculer et afficher la distance en ligne droite (optionnel)
-					var distance = calculateDistance(
-							s1.geom.coordinates[1], s1.geom.coordinates[0],
-							s2.geom.coordinates[1], s2.geom.coordinates[0]
-					);
-					document.getElementById('distanceResult').innerText = "Distance (ligne droite): " + distance.toFixed(2) + " mètres";
 
 				} else {
 					document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
 				}
 			}
-
-			function calculateRouteBetweenPoints(lat1, lon1, lat2, lon2) {
-				var url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
-
-				// Appel à l'API de routage OSRM
-				$.getJSON(url, function(data) {
-					var routeCoordinates = data.routes[0].geometry.coordinates;
-
-					// Convertir les coordonnées au format [latitude, longitude] attendu par Leaflet
-					var latlngs = routeCoordinates.map(function(coord) {
-						return [coord[1], coord[0]]; // OSRM donne les coordonnées [longitude, latitude], donc il faut inverser
-					});
-
-					// Supprimer l'itinéraire précédent si nécessaire
-					if (window.currentRoute) {
-						map.removeLayer(window.currentRoute);
-					}
-
-					// Ajouter la nouvelle polyligne pour l'itinéraire
-					var routeLine = L.polyline(latlngs, {color: 'blue', weight: 4}).addTo(map);
-
-					// Stocker l'itinéraire pour pouvoir le supprimer plus tard
-					window.currentRoute = routeLine;
-				});
-			}
-
 
 		</script>
 	</body>
