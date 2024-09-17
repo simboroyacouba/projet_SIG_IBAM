@@ -422,36 +422,6 @@
 			$.getJSON(dataUrl, function(data) {
 				structures = data;
 			});
-			// document.getElementById('selectStructures').onclick = function() {
-			//
-			// 			console.log(structures)
-			//
-			// 			var popupContent = '<div id="distance" class="popup">' +
-			// 					'<h4>Sélectionner deux structures</h4>' +
-			// 					'<select id="structureSelect1" onchange="updateSelectedStructures()">' +
-			// 					'<option value="">Choisir une structure...</option>' +
-			// 					structures.map(function(structure) {
-			// 						return '<option value="' + structure.id + '">' + structure.nom + '</option>';
-			// 					}).join('') +
-			// 					'</select>' +
-			// 					'<br/><br/>' +
-			// 					'<select id="structureSelect2" onchange="updateSelectedStructures()">' +
-			// 					'<option value="">Choisir une structure...</option>' +
-			// 					structures.map(function(structure) {
-			// 						return '<option value="' + structure.id + '">' + structure.nom + '</option>';
-			// 					}).join('') +
-			// 					'</select>' +
-			// 					'<br/><br/>' +
-			// 					'<button onclick="calculateSelectedDistance()">Calculer Distance</button>' +
-			// 					'<div id="distanceResult"></div>' +
-			// 					'</div>';
-			//
-			// 			var popup = L.popup()
-			// 					.setLatLng(map.getCenter())
-			// 					.setContent(popupContent)
-			// 					.openOn(map);
-			//
-			// };
 
 
 			function updateSelectedStructures() {
@@ -468,20 +438,103 @@
 				console.log(selectedStructures);
 			}
 
-			function calculateSelectedDistance() {
-				if (selectedStructures.length === 2) {
-					var s1 = selectedStructures[0];
-					var s2 = selectedStructures[1];
-					var distance = calculateDistance(s1.geom.coordinates[1], s1.geom.coordinates[0], s2.geom.coordinates[1], s2.geom.coordinates[0]);
-					document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
-				} else {
-					document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
-				}
-			}
+			// function calculateSelectedDistance() {
+			// 	if (selectedStructures.length === 2) {
+			// 		var s1 = selectedStructures[0];
+			// 		var s2 = selectedStructures[1];
+			// 		var distance = calculateDistance(s1.geom.coordinates[1], s1.geom.coordinates[0], s2.geom.coordinates[1], s2.geom.coordinates[0]);
+			// 		document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
+			// 	} else {
+			// 		document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
+			// 	}
+			// }
+
+			// function calculateSelectedDistance() {
+			// 	if (selectedStructures.length === 2) {
+			// 		var s1 = selectedStructures[0];
+			// 		var s2 = selectedStructures[1];
+			//
+			// 		// Calculer la distance entre les deux structures
+			// 		var distance = calculateDistance(
+			// 				s1.geom.coordinates[1], s1.geom.coordinates[0],
+			// 				s2.geom.coordinates[1], s2.geom.coordinates[0]
+			// 		);
+			// 		document.getElementById('distanceResult').innerText = "Distance: " + distance.toFixed(2) + " mètres";
+			//
+			// 		// Ajouter une ligne entre les deux points sur la carte
+			// 		var latlngs = [
+			// 			[s1.geom.coordinates[1], s1.geom.coordinates[0]], // Premier point (s1)
+			// 			[s2.geom.coordinates[1], s2.geom.coordinates[0]]  // Second point (s2)
+			// 		];
+			//
+			// 		// Supprimer la ligne précédente si elle existe (optionnel)
+			// 		if (window.currentLine) {
+			// 			map.removeLayer(window.currentLine);
+			// 		}
+			//
+			// 		// Créer une polyligne entre les deux points et l'ajouter à la carte
+			// 		var polyline = L.polyline(latlngs, {color: 'blue', weight: 3}).addTo(map);
+			//
+			// 		// Stocker la polyligne dans une variable globale pour pouvoir la supprimer plus tard si besoin
+			// 		window.currentLine = polyline;
+			//
+			// 	} else {
+			// 		document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
+			// 	}
+			// }
 			function calculateDistance(lat1, lon1, lat2, lon2) {
 				var point1 = L.latLng(lat1, lon1);
 				var point2 = L.latLng(lat2, lon2);
 				return point1.distanceTo(point2); // Distance en mètres
+			}
+
+
+			function calculateSelectedDistance() {
+				if (selectedStructures.length === 2) {
+					var s1 = selectedStructures[0];
+					var s2 = selectedStructures[1];
+
+					// Appeler la fonction pour calculer l'itinéraire en suivant les routes
+					calculateRouteBetweenPoints(
+							s1.geom.coordinates[1], s1.geom.coordinates[0],
+							s2.geom.coordinates[1], s2.geom.coordinates[0]
+					);
+
+					// Calculer et afficher la distance en ligne droite (optionnel)
+					var distance = calculateDistance(
+							s1.geom.coordinates[1], s1.geom.coordinates[0],
+							s2.geom.coordinates[1], s2.geom.coordinates[0]
+					);
+					document.getElementById('distanceResult').innerText = "Distance (ligne droite): " + distance.toFixed(2) + " mètres";
+
+				} else {
+					document.getElementById('distanceResult').innerText = "Veuillez sélectionner deux structures.";
+				}
+			}
+
+			function calculateRouteBetweenPoints(lat1, lon1, lat2, lon2) {
+				var url = `https://router.project-osrm.org/route/v1/driving/${lon1},${lat1};${lon2},${lat2}?overview=full&geometries=geojson`;
+
+				// Appel à l'API de routage OSRM
+				$.getJSON(url, function(data) {
+					var routeCoordinates = data.routes[0].geometry.coordinates;
+
+					// Convertir les coordonnées au format [latitude, longitude] attendu par Leaflet
+					var latlngs = routeCoordinates.map(function(coord) {
+						return [coord[1], coord[0]]; // OSRM donne les coordonnées [longitude, latitude], donc il faut inverser
+					});
+
+					// Supprimer l'itinéraire précédent si nécessaire
+					if (window.currentRoute) {
+						map.removeLayer(window.currentRoute);
+					}
+
+					// Ajouter la nouvelle polyligne pour l'itinéraire
+					var routeLine = L.polyline(latlngs, {color: 'blue', weight: 4}).addTo(map);
+
+					// Stocker l'itinéraire pour pouvoir le supprimer plus tard
+					window.currentRoute = routeLine;
+				});
 			}
 
 
